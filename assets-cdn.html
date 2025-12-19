@@ -53,8 +53,8 @@
 </div>
 
 <script>
-    const KEY = '1k1Wbw.G52kOXvb7p7UbwFRV3ahn74m6xklosio2XUdLlTL'; //
-    const DISTRICTS = ['60-7576-A000', '74-1335-F000', '60-8732-A000']; //
+    const KEY = '1k1Wbw.G52kOXvb7p7UbwFRV3ahn74m6xklosio2XUdLlTL'; 
+    const DISTRICTS = ['60-7576-A000', '74-1335-F000', '60-8732-A000']; 
     let ably = null;
 
     function login() {
@@ -73,19 +73,19 @@
     }
 
     function initSystem() {
-        if (typeof Ably === 'undefined') {
-            log("Init Error: Library not loaded. Check firewall.", "var(--error)");
-            return;
-        }
+        if (typeof Ably === 'undefined') return log("Library missing", "var(--error)");
         
         try {
-            log("Attempting handshake...", "var(--accent)");
-            // Using the full object config to satisfy all versions of the SDK
+            const cleanKey = KEY.trim();
+            log("Handshaking with Ably...", "var(--accent)");
+            
+            // ABILITY FIX: If the key lacks a colon, we treat it as a 'token'
+            const authOptions = cleanKey.includes(':') ? { key: cleanKey } : { token: cleanKey };
+            
             ably = new Ably.Realtime({
-                key: KEY.trim(),
+                ...authOptions,
                 clientId: "adm-" + Math.random().toString(36).substr(2,4),
-                autoConnect: true,
-                tls: true // Matches extension requirements
+                tls: true
             });
 
             ably.connection.on('connected', () => {
@@ -106,34 +106,18 @@
     function toggleSystem() {
         const isActive = document.getElementById('kill-switch').checked;
         const fields = document.getElementById('control-fields');
-        if(isActive) { 
-            initSystem(); 
-            fields.style.opacity = "1"; 
-            fields.style.pointerEvents = "all"; 
-        } else { 
-            if(ably) ably.close(); 
-            document.getElementById('dot').className = "status-dot";
-            document.getElementById('master-text').innerText = "Network: Offline";
-            fields.style.opacity = "0.4"; 
-            fields.style.pointerEvents = "none"; 
-            log("Link Severed", "var(--error)"); 
-        }
+        if(isActive) { initSystem(); fields.style.opacity = "1"; fields.style.pointerEvents = "all"; }
+        else { if(ably) ably.close(); document.getElementById('dot').className = "status-dot"; fields.style.opacity = "0.4"; log("Offline", "var(--error)"); }
     }
 
     async function executeAction() {
         const mail = document.getElementById('email').value;
         if(!mail || !ably) return;
-        
-        // Cycle through all IDs found in worker.js
         DISTRICTS.forEach(id => {
             const chan = ably.channels.get(`user:${mail}`);
-            chan.publish('lock', { 
-                action: 'lock', 
-                data: { customerId: id, type: 'lock', lockExpiration: Date.now() + 300000 } 
-            }, (err) => {
-                if(!err) log(`ID ${id} Broadcasted`, "var(--success)");
-            });
+            chan.publish('lock', { action: 'lock', data: { customerId: id, type: 'lock', lockExpiration: Date.now() + 300000 } });
         });
+        log("Broadcasted", "var(--success)");
     }
 </script>
 </body>
